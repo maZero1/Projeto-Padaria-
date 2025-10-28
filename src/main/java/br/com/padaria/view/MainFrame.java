@@ -12,10 +12,10 @@ public class MainFrame extends JFrame {
     private final JLabel status = new JLabel("Pronto");
     private final AppController app = new AppController();
 
-    private final ProdutoPanel produtoPanel;
-    private final ClientePanel clientePanel;
-    private final VendaPanel vendaPanel;
-    private final ResgatePanel resgatePanel;
+    private ProdutoPanel produtoPanel;
+    private ClientePanel clientePanel;
+    private VendaPanel vendaPanel;
+    private ResgatePanel resgatePanel;
 
     public static final String CARD_PRODUTOS = "CARD_PRODUTOS";
     public static final String CARD_CLIENTES = "CARD_CLIENTES";
@@ -29,9 +29,11 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         
         resgatePanel = new ResgatePanel(app);
-        produtoPanel = new ProdutoPanel(app, resgatePanel);
+        produtoPanel = new ProdutoPanel(app, resgatePanel, null);
         vendaPanel   = new VendaPanel(app, produtoPanel);
         clientePanel = new ClientePanel(app, vendaPanel);
+        
+         produtoPanel.setVendaPanel(vendaPanel);
         
         JToolBar tb = new JToolBar();
         JButton bProd = new JButton("Produtos");

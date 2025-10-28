@@ -12,14 +12,18 @@ public class ProdutoPanel extends JPanel {
 
     private final AppController app;
     private final ResgatePanel resgatePanel;
-    
+    private VendaPanel vendaPanel;
+
     private final DefaultTableModel model = new DefaultTableModel(
-        new Object[] {"ID", "Nome", "Preço", "Estoque", "Resgatável", "Custo (pts)"}, 0) {
-        @Override public boolean isCellEditable(int r, int c) { return false; }
+            new Object[]{"ID", "Nome", "Preço", "Estoque", "Resgatável", "Custo (pts)"}, 0) {
+        @Override
+        public boolean isCellEditable(int r, int c) {
+            return false;
+        }
     };
     private final JTable table = new JTable(model);
 
-    public ProdutoPanel(AppController app, ResgatePanel resgatePanel) {
+    public ProdutoPanel(AppController app, ResgatePanel resgatePanel, VendaPanel vendaPanel) {
         this.app = app;
         setLayout(new BorderLayout());
 
@@ -30,7 +34,9 @@ public class ProdutoPanel extends JPanel {
         bAdd.addActionListener(e -> addProduto());
         bEdt.addActionListener(e -> editProduto());
         bDel.addActionListener(e -> delProduto());
-        bar.add(bAdd); bar.add(bEdt); bar.add(bDel);
+        bar.add(bAdd);
+        bar.add(bEdt);
+        bar.add(bDel);
 
         table.setFillsViewportHeight(true);
         table.setPreferredScrollableViewportSize(new Dimension(700, 400));
@@ -38,8 +44,13 @@ public class ProdutoPanel extends JPanel {
         add(bar, BorderLayout.NORTH);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        reload();
         this.resgatePanel = resgatePanel;
+        this.vendaPanel = vendaPanel;
+        reload();
+    }
+
+    public void setVendaPanel(VendaPanel vendaPanel) {
+        this.vendaPanel = vendaPanel;
     }
 
     public void reload() {
@@ -53,7 +64,7 @@ public class ProdutoPanel extends JPanel {
     private void addProduto() {
         JTextField tfNome = new JTextField();
         JTextField tfPreco = new JTextField();
-        JTextField tfEstq  = new JTextField();
+        JTextField tfEstq = new JTextField();
         JCheckBox cbResg = new JCheckBox("Resgatável");
         JTextField tfPts = new JTextField("0");
 
@@ -62,12 +73,15 @@ public class ProdutoPanel extends JPanel {
         if (op == JOptionPane.OK_OPTION) {
             try {
                 Produto p = new Produto(null, tfNome.getText().trim(),
-                    Double.parseDouble(tfPreco.getText().trim()),
-                    Integer.parseInt(tfEstq.getText().trim()),
-                    cbResg.isSelected(),
-                    Integer.parseInt(tfPts.getText().trim()));
+                        Double.parseDouble(tfPreco.getText().trim()),
+                        Integer.parseInt(tfEstq.getText().trim()),
+                        cbResg.isSelected(),
+                        Integer.parseInt(tfPts.getText().trim()));
                 app.produtos().save(p);
                 reload();
+                if (vendaPanel != null) {
+                    vendaPanel.carregarCombos();
+                }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Dados inválidos: " + ex.getMessage());
             }
@@ -76,14 +90,20 @@ public class ProdutoPanel extends JPanel {
 
     private void editProduto() {
         int row = table.getSelectedRow();
-        if (row < 0) { JOptionPane.showMessageDialog(this, "Selecione um produto"); return; }
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Selecione um produto");
+            return;
+        }
         Integer id = (Integer) model.getValueAt(row, 0);
         Produto p = app.produtos().findById(id);
-        if (p == null) { JOptionPane.showMessageDialog(this, "Produto não encontrado"); return; }
+        if (p == null) {
+            JOptionPane.showMessageDialog(this, "Produto não encontrado");
+            return;
+        }
 
         JTextField tfNome = new JTextField(p.getNome());
         JTextField tfPreco = new JTextField(String.valueOf(p.getPreco()));
-        JTextField tfEstq  = new JTextField(String.valueOf(p.getEstoque()));
+        JTextField tfEstq = new JTextField(String.valueOf(p.getEstoque()));
         JCheckBox cbResg = new JCheckBox("Resgatável", p.isResgatavel());
         JTextField tfPts = new JTextField(String.valueOf(p.getCustoPontos()));
 
@@ -97,7 +117,10 @@ public class ProdutoPanel extends JPanel {
                 p.setResgatavel(cbResg.isSelected());
                 p.setCustoPontos(Integer.parseInt(tfPts.getText().trim()));
                 app.produtos().save(p);
-                reload();                
+                reload();
+                if (vendaPanel != null) {
+                    vendaPanel.carregarCombos();
+                }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Dados inválidos: " + ex.getMessage());
             }
@@ -106,12 +129,18 @@ public class ProdutoPanel extends JPanel {
 
     private void delProduto() {
         int row = table.getSelectedRow();
-        if (row < 0) { JOptionPane.showMessageDialog(this, "Selecione um produto"); return; }
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Selecione um produto");
+            return;
+        }
         Integer id = (Integer) model.getValueAt(row, 0);
         int op = JOptionPane.showConfirmDialog(this, "Excluir produto " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
         if (op == JOptionPane.YES_OPTION) {
             app.produtos().delete(id);
             reload();
+            if (vendaPanel != null) {
+                vendaPanel.carregarCombos();
+            }
         }
     }
 }

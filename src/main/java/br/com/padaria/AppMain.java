@@ -2,7 +2,6 @@ package br.com.padaria;
 
 import br.com.padaria.view.MainFrame;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 public class AppMain {
     public static void main(String[] args) {
@@ -13,8 +12,8 @@ public class AppMain {
                     break;
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            System.out.println("Não foi possível aplicar o Nimbus LAF: " + ex.getMessage());
+        } catch (Exception e) {
+            System.out.println("Não foi possível aplicar o Nimbus: " + e.getMessage());
         }
 
         java.awt.EventQueue.invokeLater(() -> new MainFrame().setVisible(true));
