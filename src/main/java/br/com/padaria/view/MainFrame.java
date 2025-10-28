@@ -30,7 +30,7 @@ public class MainFrame extends JFrame {
         
         resgatePanel = new ResgatePanel(app);
         produtoPanel = new ProdutoPanel(app, resgatePanel);
-        vendaPanel   = new VendaPanel(app);
+        vendaPanel   = new VendaPanel(app, produtoPanel);
         clientePanel = new ClientePanel(app, vendaPanel);
         
         JToolBar tb = new JToolBar();

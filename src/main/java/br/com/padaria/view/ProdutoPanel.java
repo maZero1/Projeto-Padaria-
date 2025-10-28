@@ -42,7 +42,7 @@ public class ProdutoPanel extends JPanel {
         this.resgatePanel = resgatePanel;
     }
 
-    private void reload() {
+    public void reload() {
         model.setRowCount(0);
         List<Produto> list = app.produtos().findAll();
         for (Produto p : list) {

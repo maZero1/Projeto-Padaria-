@@ -2,15 +2,12 @@ package br.com.padaria.service;
 
 import br.com.padaria.model.Cliente;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClienteService implements CrudService<Cliente, Integer> {
 
-    private final List<Cliente> storage = new ArrayList<>();
-    private final AtomicInteger seq = new AtomicInteger(1);
+    private final List<Cliente> listaClientes = new ArrayList<>();
+    private int proximoIdSequencial = 1;
 
     public ClienteService() {
         save(new Cliente(null, "Ana Clara", "111.222.333-44", "(48) 98888-0001", 0));
@@ -19,37 +16,58 @@ public class ClienteService implements CrudService<Cliente, Integer> {
     }
 
     @Override
-    public List<Cliente> findAll() { return Collections.unmodifiableList(storage); }
-
-    @Override
-    public Cliente findById(Integer id) {
-        Optional<Cliente> opt = storage.stream().filter(c -> c.getId().equals(id)).findFirst();
-        return opt.orElse(null);
+    public List<Cliente> findAll() {
+        return listaClientes;
     }
 
     @Override
-    public Cliente save(Cliente c) {
-        if (c.getId() == null) {
-            c.setId(seq.getAndIncrement());
-            storage.add(c);
-        } else {
-            for (int i=0;i<storage.size();i++) {
-                if (storage.get(i).getId().equals(c.getId())) {
-                    Cliente existente = storage.get(i);
-                    existente.setNome(c.getNome());
-                    existente.setCpf(c.getCpf());
-                    existente.setTelefone(c.getTelefone());
-                    existente.setPontos(c.getPontos());
-                return existente;
-                }
+    public Cliente findById(Integer idBuscado) {
+        for (Cliente clienteAtual : listaClientes) {
+            if (clienteAtual.getId() != null && clienteAtual.getId().equals(idBuscado)) {
+                return clienteAtual;
             }
-            storage.add(c);
         }
-        return c;
+        return null;
     }
 
     @Override
-    public boolean delete(Integer id) {
-        return storage.removeIf(c -> c.getId().equals(id));
+    public Cliente save(Cliente clienteParaSalvar) {
+        if (clienteParaSalvar.getId() == null) {
+            clienteParaSalvar.setId(proximoIdSequencial++);
+            listaClientes.add(clienteParaSalvar);
+            return clienteParaSalvar;
+        }
+
+        for (Cliente clienteExistente : listaClientes) {
+            if (clienteExistente.getId().equals(clienteParaSalvar.getId())) {
+                clienteExistente.setNome(clienteParaSalvar.getNome());
+                clienteExistente.setCpf(clienteParaSalvar.getCpf());
+                clienteExistente.setTelefone(clienteParaSalvar.getTelefone());
+                clienteExistente.setPontos(clienteParaSalvar.getPontos());
+                return clienteExistente;
+            }
+        }
+
+        listaClientes.add(clienteParaSalvar);
+        if (clienteParaSalvar.getId() >= proximoIdSequencial) {
+            proximoIdSequencial = clienteParaSalvar.getId() + 1; //garantia para não ter erro
+        }
+        return clienteParaSalvar;
+    }
+
+    @Override
+    public boolean delete(Integer idParaExcluir) {
+        Cliente clienteParaRemover = null;
+        for (Cliente clienteAtual : listaClientes) {
+            if (clienteAtual.getId().equals(idParaExcluir)) {
+                clienteParaRemover = clienteAtual;
+                break;
+            }
+        }
+        if (clienteParaRemover != null) {
+            listaClientes.remove(clienteParaRemover);
+            return true;
+        }
+        return false;
     }
 }

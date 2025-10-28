@@ -2,18 +2,14 @@ package br.com.padaria.service;
 
 import br.com.padaria.model.Produto;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProdutoService implements CrudService<Produto, Integer> {
 
-    private final List<Produto> storage = new ArrayList<>();
-    private final AtomicInteger seq = new AtomicInteger(1);
+    private final List<Produto> listaProdutos = new ArrayList<>();
+    private int proximoIdSequencial = 1;
 
     public ProdutoService() {
-        // seeds
         save(new Produto(null, "Pão Francês", 1.00, 200, true, 10));
         save(new Produto(null, "Café 500g", 25.90, 30, false, 0));
         save(new Produto(null, "Sonho", 6.50, 50, true, 45));
@@ -21,33 +17,59 @@ public class ProdutoService implements CrudService<Produto, Integer> {
     }
 
     @Override
-    public List<Produto> findAll() { return Collections.unmodifiableList(storage); }
-
-    @Override
-    public Produto findById(Integer id) {
-        Optional<Produto> opt = storage.stream().filter(p -> p.getId().equals(id)).findFirst();
-        return opt.orElse(null);
+    public List<Produto> findAll() {
+        return listaProdutos;
     }
 
     @Override
-    public Produto save(Produto p) {
-        if (p.getId() == null) {
-            p.setId(seq.getAndIncrement());
-            storage.add(p);
-        } else {
-            for (int i=0;i<storage.size();i++) {
-                if (storage.get(i).getId().equals(p.getId())) {
-                    storage.set(i, p);
-                    return p;
-                }
+    public Produto findById(Integer idBuscado) {
+        for (Produto produtoAtual : listaProdutos) {
+            if (produtoAtual.getId() != null && produtoAtual.getId().equals(idBuscado)) {
+                return produtoAtual;
             }
-            storage.add(p);
         }
-        return p;
+        return null;
     }
 
     @Override
-    public boolean delete(Integer id) {
-        return storage.removeIf(p -> p.getId().equals(id));
+    public Produto save(Produto produtoParaSalvar) {
+        if (produtoParaSalvar.getId() == null) {
+            produtoParaSalvar.setId(proximoIdSequencial++);
+            listaProdutos.add(produtoParaSalvar);
+            return produtoParaSalvar;
+        }
+
+        for (Produto produtoExistente : listaProdutos) {
+            if (produtoExistente.getId().equals(produtoParaSalvar.getId())) {
+                produtoExistente.setNome(produtoParaSalvar.getNome());
+                produtoExistente.setPreco(produtoParaSalvar.getPreco());
+                produtoExistente.setEstoque(produtoParaSalvar.getEstoque());
+                produtoExistente.setResgatavel(produtoParaSalvar.isResgatavel());
+                produtoExistente.setCustoPontos(produtoParaSalvar.getCustoPontos());
+                return produtoExistente;
+            }
+        }
+
+        listaProdutos.add(produtoParaSalvar);
+        if (produtoParaSalvar.getId() >= proximoIdSequencial) {
+            proximoIdSequencial = produtoParaSalvar.getId() + 1; // garantia para não ter erro
+        }
+        return produtoParaSalvar;
+    }
+
+    @Override
+    public boolean delete(Integer idParaExcluir) {
+        Produto produtoParaRemover = null;
+        for (Produto produtoAtual : listaProdutos) {
+            if (produtoAtual.getId().equals(idParaExcluir)) {
+                produtoParaRemover = produtoAtual;
+                break;
+            }
+        }
+        if (produtoParaRemover != null) {
+            listaProdutos.remove(produtoParaRemover);
+            return true;
+        }
+        return false;
     }
 }
