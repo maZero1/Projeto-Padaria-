@@ -14,11 +14,6 @@ Programa de fidelidade baseado em regras configuráveis (ex: 1 ponto a cada R$10
 
 Troca de pontos por produtos elegíveis
 
-Relatórios básicos:
-
-Vendas por período
-
-Produtos mais vendidos
 
 | Camada            | Tecnologia         |
 | ----------------- | ------------------ |
@@ -30,6 +25,6 @@ Produtos mais vendidos
 
 📌 Objetivo Acadêmico
 
-Este repositório faz parte de um trabalho acadêmico de Programação Orientada a Objetos, com foco em
+Este repositório faz parte de um trabalho acadêmico de Programação Orientada a Objetos II, com foco em
 modelagem, organização de código e boas práticas estruturais. O projeto foi planejado para ser escalável
 e modular, simulando um sistema real de uso comercial.
